@@ -342,7 +342,10 @@
               eigenständig.
             </openwb-base-alert>
             <openwb-base-alert
-              v-if="selectedControlMode === 'limit_charge_power' && !hasChargePowerLimitControllableBatteries"
+              v-if="
+                (selectedControlMode === 'limit_charge_power' || selectedControlMode === 'scheduled') &&
+                !hasChargePowerLimitControllableBatteries
+              "
               subtype="danger"
             >
               Kein im System vorhandener Speicher unterstützt die Ladeleistungsbegrenzung.
@@ -447,7 +450,7 @@
               Strompreis-Anbieter schaltet der Speicher auf Eigenregelung.
             </openwb-base-alert>
 
-            <div v-if="selectedControlMode === 'manual'">
+            <div v-if="selectedControlMode === 'manual' || selectedControlMode === 'scheduled'">
               <openwb-base-heading class="mt-0"> Manuelle Vorgabe </openwb-base-heading>
               <openwb-base-button-group-input
                 title="Speicher"
@@ -477,7 +480,7 @@
               </openwb-base-number-input>
             </div>
 
-            <div v-if="selectedControlMode === 'limit_charge_power'">
+            <div v-if="selectedControlMode === 'limit_charge_power' || selectedControlMode === 'scheduled'">
               <openwb-base-heading class="mt-0"> Ladeleistung begrenzen </openwb-base-heading>
               <openwb-base-number-input
                 title="Ladeleistung begrenzen auf"
