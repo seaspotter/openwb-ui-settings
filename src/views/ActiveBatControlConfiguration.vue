@@ -327,7 +327,31 @@
               :options="controlModeOptions"
               :model-value="selectedControlMode"
               @update:model-value="updateState('openWB/bat/config/control_mode', $event)"
-            />
+            >
+              <template #help>
+                <ul class="pl-3 mb-0">
+                  <li>Eigenregelung: keine Eingriffe, der Speicher regelt sich selbst.</li>
+                  <li>
+                    Speicher für Hausverbrauch reservieren: Entladung während der Fahrzeugladung auf den Hausverbrauch
+                    begrenzen, damit das Fahrzeug den PV-Überschuss bekommt.
+                  </li>
+                  <li>Entladung sperren (immer): der Speicher darf nie entladen, nur laden.</li>
+                  <li>
+                    PV-Ertrag im Speicher laden: während der Fahrzeugladung lädt der Speicher weiter mit PV-Überschuss,
+                    statt diesen komplett dem Fahrzeug zu überlassen.
+                  </li>
+                  <li>Laden erzwingen unter Preisgrenze: unabhängig von PV mit voller Leistung laden, wenn günstig.</li>
+                  <li>Entladesperre über Preisgrenze: Entladung verhindern, wenn der Strompreis hoch ist.</li>
+                  <li>Preisband: kombiniert beide Preismodi, dazwischen Eigenregelung.</li>
+                  <li>Manuelle Vorgabe: Laden oder Stop fest vorgeben (Entladen ist in Deutschland nicht erlaubt).</li>
+                  <li>
+                    Ladeleistung begrenzen: Obergrenze für die Ladeleistung setzen, Entladung/Timing bleiben in
+                    Eigenregelung - funktioniert auch auf Speichern ohne bidirektionale Vorgabe.
+                  </li>
+                  <li>Zeitgesteuert: wählt anhand von Zeitplänen automatisch zwischen den obigen Modi.</li>
+                </ul>
+              </template>
+            </openwb-base-select-input>
             <openwb-base-alert
               subtype="info"
               class="mb-3"
@@ -415,7 +439,13 @@
               </openwb-base-range-input>
             </div>
 
-            <div v-if="selectedControlMode === 'force_charge_below_price' || selectedControlMode === 'scheduled'">
+            <div
+              v-if="
+                selectedControlMode === 'force_charge_below_price' ||
+                selectedControlMode === 'price_band' ||
+                selectedControlMode === 'scheduled'
+              "
+            >
               <openwb-base-number-input
                 title="Speicher aktiv laden für Strompreise unter"
                 :step="0.001"
@@ -426,7 +456,13 @@
                 @update:model-value="updateState('openWB/bat/config/charge_limit', $event / 100)"
               />
             </div>
-            <div v-if="selectedControlMode === 'block_discharge_above_price' || selectedControlMode === 'scheduled'">
+            <div
+              v-if="
+                selectedControlMode === 'block_discharge_above_price' ||
+                selectedControlMode === 'price_band' ||
+                selectedControlMode === 'scheduled'
+              "
+            >
               <openwb-base-number-input
                 title="Entladesperre für Strompreise über"
                 :step="0.001"
@@ -441,6 +477,7 @@
               v-if="
                 (selectedControlMode === 'force_charge_below_price' ||
                   selectedControlMode === 'block_discharge_above_price' ||
+                  selectedControlMode === 'price_band' ||
                   selectedControlMode === 'scheduled') &&
                 !$store.state.mqtt['openWB/optional/ep/configured']
               "
@@ -573,6 +610,10 @@ export default {
         { value: "pv_yield_while_charging", text: "PV-Ertrag im Speicher laden, solange ein Fahrzeug lädt" },
         { value: "force_charge_below_price", text: "Laden erzwingen, solange Strompreis unter Grenze" },
         { value: "block_discharge_above_price", text: "Entladung sperren, solange Strompreis über Grenze" },
+        {
+          value: "price_band",
+          text: "Laden erzwingen unter Grenze / Entladesperre über Grenze / dazwischen Eigenregelung",
+        },
         { value: "manual", text: "Manuelle Vorgabe" },
         { value: "limit_charge_power", text: "Ladeleistung begrenzen" },
         { value: "peak_shaving", text: "PeakShaving, prognosebasiert (in Vorbereitung)" },
@@ -694,6 +735,7 @@ export default {
         "pv_yield_while_charging",
         "force_charge_below_price",
         "block_discharge_above_price",
+        "price_band",
         "manual",
         "scheduled",
       ].includes(this.selectedControlMode);
