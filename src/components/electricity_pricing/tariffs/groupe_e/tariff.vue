@@ -1,5 +1,5 @@
 <template>
-  <div class="flexible-tariff-groupe-e">
+  <div class="tariff-groupe-e">
     <openwb-base-alert subtype="info">
       Tarif Vario der Groupe E (Westschweiz) - www.groupe-e.ch/de/strom/vario
       <br />
@@ -11,10 +11,10 @@
 </template>
 
 <script>
-import FlexibleTariffConfigMixin from "../FlexibleTariffConfigMixin.vue";
+import TariffConfigMixin from "../TariffConfigMixin.vue";
 
 export default {
-  name: "FlexibleTariffGroupeE",
-  mixins: [FlexibleTariffConfigMixin],
+  name: "TariffGroupeE",
+  mixins: [TariffConfigMixin],
 };
 </script>

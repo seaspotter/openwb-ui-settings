@@ -11,7 +11,7 @@
           </div>
           <div v-else>
             <openwb-base-alert
-              v-if="!flexibleTariffProvider?.type"
+              v-if="!tariffProvider?.type"
               subtype="warning"
             >
               Es ist kein Stromtarif eingerichtet. Die Ladekosten werden mit {{ fallbackPriceText }} berechnet. Wähle
@@ -20,8 +20,10 @@
             <openwb-base-alert subtype="info">
               <p>
                 Der Stromtarif ist der Preis für Strom aus dem Netz. Er wird für die Berechnung der Ladekosten und für
-                das preisbasierte Laden verwendet. Ein fester Preis kann als "Fester Stromtarif" eingetragen werden,
-                auch mit Hoch- und Niedertarif.
+                das preisbasierte Laden verwendet. Es gibt drei Arten: Ein "Fester Stromtarif" ist ein gleichbleibender
+                Preis nur für die Ladekosten. Der "Zeitabhängige Tarif" hat Preise für bestimmte Zeiten (Hoch- und
+                Niedertarif). Dynamische Anbieter liefern Börsenpreise. Preisbasiertes Laden ist mit zeitabhängigen und
+                dynamischen Tarifen möglich.
               </p>
               <p>
                 Ist in den Lademodi Eco und Zeitladen "Preisbasiertes Laden" gewählt, wird nur geladen, wenn der
@@ -37,14 +39,14 @@
             <openwb-base-select-input
               class="mb-2"
               title="Anbieter"
-              :options="flexibleTariffList"
-              :model-value="flexibleTariffProvider ? flexibleTariffProvider.type : ''"
-              @update:model-value="updateSelectedFlexibleTariff($event)"
+              :options="tariffList"
+              :model-value="tariffProvider ? tariffProvider.type : ''"
+              @update:model-value="updateSelectedTariff($event)"
             />
-            <div v-if="flexibleTariffProvider?.type">
-              <openwb-flexible-tariff-proxy
-                :flexible-tariff="flexibleTariffProvider"
-                @update:configuration="updateConfiguration('openWB/optional/ep/flexible_tariff/provider', $event)"
+            <div v-if="tariffProvider?.type">
+              <openwb-tariff-proxy
+                :tariff="tariffProvider"
+                @update:configuration="updateConfiguration('openWB/optional/ep/tariff/provider', $event)"
               />
             </div>
           </div>
@@ -52,15 +54,15 @@
       </openwb-base-card>
 
       <openwb-base-card
-        v-if="flexibleTariffProvider?.type"
+        v-if="tariffProvider?.type"
         title="Allgemeine Informationen Stromtarif"
       >
         <div>
-          <openwb-pricing-status source="flexible_tariff" />
+          <openwb-pricing-status source="tariff" />
         </div>
         <template #footer>
           <openwb-base-alert
-            v-if="flexibleTariffProvider.type !== 'fixed_hours'"
+            v-if="!['fixed_price', 'fixed_hours'].includes(tariffProvider.type)"
             subtype="warning"
           >
             Je nach Anbieter kann die Anzahl der API-Abrufe begrenzt sein. Ein manuelles Aktualisieren kann daher
@@ -70,7 +72,7 @@
             <div class="col-md-4 d-flex py-1 justify-content-center">
               <openwb-base-click-button
                 class="btn-primary"
-                @click="triggerUpdate('flexible_tariff')"
+                @click="triggerUpdate('tariff')"
               >
                 Strompreise aktualisieren
               </openwb-base-click-button>
@@ -280,7 +282,7 @@
 
 <script>
 import ComponentState from "../components/mixins/ComponentState.vue";
-import OpenwbFlexibleTariffProxy from "../components/electricity_pricing/flexible_tariffs/OpenwbFlexibleTariffProxy.vue";
+import OpenwbTariffProxy from "../components/electricity_pricing/tariffs/OpenwbTariffProxy.vue";
 import OpenwbGridFeeProxy from "../components/electricity_pricing/grid_fees/OpenwbGridFeeProxy.vue";
 import OpenwbPriceCalculator from "../components/electricity_pricing/PriceCalculator.vue";
 import OpenwbPricingStatus from "../components/electricity_pricing/PricingStatus.vue";
@@ -288,12 +290,12 @@ import OpenwbTimeSeriesChart from "../components/OpenwbTimeSeriesChart.vue";
 
 // Rückfallpreis des Backends, solange kein Stromtarif eingerichtet ist (€/Wh)
 const FALLBACK_GRID_PRICE = 0.0003;
-const PRICE_SOURCES = ["flexible_tariff", "grid_fee", "pv_price", "bat_price", "feed_in_price"];
+const PRICE_SOURCES = ["tariff", "grid_fee", "pv_price", "bat_price", "feed_in_price"];
 
 export default {
   name: "OpenwbElectricityPricesConfigView",
   components: {
-    OpenwbFlexibleTariffProxy,
+    OpenwbTariffProxy,
     OpenwbGridFeeProxy,
     OpenwbPriceCalculator,
     OpenwbPricingStatus,
@@ -308,7 +310,7 @@ export default {
       { topic: "openWB/general/prices/fixed_price", writeable: true },
       { topic: "openWB/optional/ep/configured", writeable: false },
       { topic: "openWB/optional/ep/get/prices", writeable: false },
-      { topic: "openWB/system/configurable/flexible_tariffs", writeable: false },
+      { topic: "openWB/system/configurable/tariffs", writeable: false },
       { topic: "openWB/system/configurable/grid_fees", writeable: false },
     ];
     PRICE_SOURCES.forEach((source) => {
@@ -324,14 +326,14 @@ export default {
     };
   },
   computed: {
-    flexibleTariffList() {
-      return this.$store.state.mqtt["openWB/system/configurable/flexible_tariffs"];
+    tariffList() {
+      return this.$store.state.mqtt["openWB/system/configurable/tariffs"];
     },
     gridFeeList() {
       return this.$store.state.mqtt["openWB/system/configurable/grid_fees"];
     },
-    flexibleTariffProvider() {
-      return this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/provider"];
+    tariffProvider() {
+      return this.$store.state.mqtt["openWB/optional/ep/tariff/provider"];
     },
     gridFeeProvider() {
       return this.$store.state.mqtt["openWB/optional/ep/grid_fee/provider"];
@@ -341,16 +343,16 @@ export default {
     },
     chartDatasets() {
       const mqtt = this.$store.state.mqtt;
-      const combinedPrices = mqtt["openWB/optional/ep/configured"] ? mqtt["openWB/optional/ep/get/prices"] : undefined;
+      const combinedPrices = mqtt["openWB/optional/ep/get/prices"];
       const lastCombinedTimestamp = Math.max(0, ...Object.keys(combinedPrices || {}).map(Number));
-      const tariffAndGridFee = this.flexibleTariffProvider?.type && this.gridFeeProvider?.type;
+      const tariffAndGridFee = this.tariffProvider?.type && this.gridFeeProvider?.type;
       // wie die Status-Karte: bei Stromtarif und Netzentgelt Gesamtpreis und Einzelpreise, sonst nur ein Strompreis
       const series = tariffAndGridFee
         ? [
             { label: "Gesamtpreis", prices: combinedPrices, color: "#28a745" },
             {
               label: "Stromtarif",
-              prices: mqtt["openWB/optional/ep/flexible_tariff/get/prices"],
+              prices: mqtt["openWB/optional/ep/tariff/get/prices"],
               color: "#8b1a1a",
               until: lastCombinedTimestamp,
             },
@@ -433,12 +435,9 @@ export default {
       console.warn("no default configuration found for provider type!", type);
       return {};
     },
-    updateSelectedFlexibleTariff($event) {
-      this.updateState("openWB/optional/ep/flexible_tariff/provider", $event, "type");
-      this.updateState(
-        "openWB/optional/ep/flexible_tariff/provider",
-        this.getDefaultConfiguration(this.flexibleTariffList, $event),
-      );
+    updateSelectedTariff($event) {
+      this.updateState("openWB/optional/ep/tariff/provider", $event, "type");
+      this.updateState("openWB/optional/ep/tariff/provider", this.getDefaultConfiguration(this.tariffList, $event));
     },
     updateSelectedGridFee($event) {
       this.updateState("openWB/optional/ep/grid_fee/provider", $event, "type");

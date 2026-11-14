@@ -1,5 +1,5 @@
 <template>
-  <div class="flexible-tariff-ekz">
+  <div class="tariff-ekz">
     <openwb-base-alert subtype="info">
       Dynamischer Tarif der Elektrizitätswerke des Kantons Zürich (EKZ) -
       www.ekz.ch/de/privatkunden/strom/tarife/dynamischer-wahltarif.html
@@ -13,10 +13,10 @@
 </template>
 
 <script>
-import FlexibleTariffConfigMixin from "../FlexibleTariffConfigMixin.vue";
+import TariffConfigMixin from "../TariffConfigMixin.vue";
 
 export default {
-  name: "FlexibleTariffEkz",
-  mixins: [FlexibleTariffConfigMixin],
+  name: "TariffEkz",
+  mixins: [TariffConfigMixin],
 };
 </script>

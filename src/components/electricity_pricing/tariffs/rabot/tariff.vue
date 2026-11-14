@@ -1,5 +1,5 @@
 <template>
-  <div class="flexible-tariff-rabot">
+  <div class="tariff-rabot">
     <openwb-base-alert subtype="info">
       Über die Rabot-Authentifizierung kannst Du Deine Stromtarif-Daten für die Ladeplanung nutzen. Nach der Anmeldung
       bei Rabot wird eine Kundennummer in der Adresszeile angezeigt, die Du hier einfügen musst.
@@ -23,7 +23,7 @@
     <openwb-base-text-input
       title="2. Kundennummer kopieren und einfügen"
       required
-      :model-value="flexibleTariff.configuration.customer_number"
+      :model-value="tariff.configuration.customer_number"
       @update:model-value="updateConfiguration($event, 'configuration.customer_number')"
     >
       <template #help>
@@ -36,7 +36,7 @@
       title="3. Vertragsnummer abrufen"
       button-text="Vertrag laden"
       subtype="info"
-      :disabled="!flexibleTariff.configuration.customer_number"
+      :disabled="!tariff.configuration.customer_number"
       @button-clicked="fetch_contract_number"
     >
       <template #help>
@@ -47,7 +47,7 @@
     <openwb-base-select-input
       title="Vertragsnummer"
       :options="contractOptions"
-      :model-value="flexibleTariff.configuration.contract_number"
+      :model-value="tariff.configuration.contract_number"
       @update:model-value="updateConfiguration($event, 'configuration.contract_number')"
     >
       <template #help>
@@ -59,11 +59,11 @@
 
 <script>
 import axios from "axios";
-import FlexibleTariffConfigMixin from "../FlexibleTariffConfigMixin.vue";
+import TariffConfigMixin from "../TariffConfigMixin.vue";
 
 export default {
-  name: "FlexibleTariffRabot",
-  mixins: [FlexibleTariffConfigMixin],
+  name: "TariffRabot",
+  mixins: [TariffConfigMixin],
   data() {
     return {
       contractNumbers: [],
@@ -77,10 +77,10 @@ export default {
       }));
 
       // Fallback: Wenn keine Options vorhanden sind, aber eine Vertragsnummer in der Config existiert
-      if (options.length === 0 && this.flexibleTariff.configuration.contract_number) {
+      if (options.length === 0 && this.tariff.configuration.contract_number) {
         options.push({
-          value: this.flexibleTariff.configuration.contract_number,
-          text: this.flexibleTariff.configuration.contract_number,
+          value: this.tariff.configuration.contract_number,
+          text: this.tariff.configuration.contract_number,
         });
       }
 
@@ -127,7 +127,7 @@ export default {
     },
 
     async fetch_contract_number() {
-      if (!this.flexibleTariff.configuration.customer_number) {
+      if (!this.tariff.configuration.customer_number) {
         this.$root.postClientMessage("Bitte gib zuerst eine Kundennummer ein.", "warning");
         return;
       }
@@ -135,7 +135,7 @@ export default {
       try {
         // Call the Rabot proxy endpoint to get contracts
         const response = await axios.get(
-          `https://rabot.openwb.de/rabot-proxy.php/customers/${this.flexibleTariff.configuration.customer_number}/contracts`,
+          `https://rabot.openwb.de/rabot-proxy.php/customers/${this.tariff.configuration.customer_number}/contracts`,
           {
             headers: {
               "Content-Type": "application/json",

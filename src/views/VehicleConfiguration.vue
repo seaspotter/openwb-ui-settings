@@ -1285,8 +1285,9 @@
                 v-if="!$store.state.mqtt['openWB/optional/ep/configured']"
                 subtype="warning"
               >
-                Bitte in den übergreifenden Ladeeinstellungen einen Strompreis-Anbieter konfigurieren. Ohne
-                Strompreis-Anbieter wird im Modus Eco nur geladen, wenn Überschuss vorhanden ist.
+                Bitte unter Konfiguration - Energiekosten einen dynamischen Strompreis-Anbieter oder einen
+                zeitabhängigen Tarif (HT/NT) konfigurieren. Ohne diese wird im Modus Eco nur geladen, wenn Überschuss
+                vorhanden ist.
               </openwb-base-alert>
               <openwb-base-number-input
                 title="Preisgrenze für strompreisbasiertes Laden"

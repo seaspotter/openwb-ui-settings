@@ -91,10 +91,10 @@ export default {
     return {
       mqttTopics: [
         { topic: "openWB/optional/ep/configured", writeable: false },
-        { topic: "openWB/optional/ep/flexible_tariff/get/fault_state", writeable: false },
-        { topic: "openWB/optional/ep/flexible_tariff/get/fault_str", writeable: false },
-        { topic: "openWB/optional/ep/flexible_tariff/get/prices", writeable: false },
-        { topic: "openWB/optional/ep/flexible_tariff/provider", writeable: false },
+        { topic: "openWB/optional/ep/tariff/get/fault_state", writeable: false },
+        { topic: "openWB/optional/ep/tariff/get/fault_str", writeable: false },
+        { topic: "openWB/optional/ep/tariff/get/prices", writeable: false },
+        { topic: "openWB/optional/ep/tariff/provider", writeable: false },
         { topic: "openWB/optional/ep/get/prices", writeable: false },
         { topic: "openWB/optional/ep/grid_fee/get/fault_state", writeable: false },
         { topic: "openWB/optional/ep/grid_fee/get/fault_str", writeable: false },
@@ -304,35 +304,35 @@ export default {
 
       // Stromtarif-Preise
       if (
-        this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/provider"]?.type &&
-        this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/get/prices"]
+        this.$store.state.mqtt["openWB/optional/ep/tariff/provider"]?.type &&
+        this.$store.state.mqtt["openWB/optional/ep/tariff/get/prices"]
       ) {
-        var flexibleTariffEntries = this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/get/prices"];
-        var flexibleTariffData = [];
-        for (const [key, value] of Object.entries(flexibleTariffEntries)) {
+        var tariffEntries = this.$store.state.mqtt["openWB/optional/ep/tariff/get/prices"];
+        var tariffData = [];
+        for (const [key, value] of Object.entries(tariffEntries)) {
           if (lastTimestampPriceSums && key * 1000 > lastTimestampPriceSums) {
             // ignore entries that are newer than the last timestamp of the main price feed
             continue;
           }
-          flexibleTariffData.push({
+          tariffData.push({
             timestamp: key * 1000,
             price: value * 100000,
           });
         }
         // repeat last dataset
-        if (flexibleTariffData.length > 0) {
-          const lastData = flexibleTariffData.slice(-1)[0];
+        if (tariffData.length > 0) {
+          const lastData = tariffData.slice(-1)[0];
           let nextTimestamp = endOfToday;
-          if (flexibleTariffData.length > 1) {
-            const previousData = flexibleTariffData.slice(-2, -1)[0];
+          if (tariffData.length > 1) {
+            const previousData = tariffData.slice(-2, -1)[0];
             nextTimestamp = lastData.timestamp + lastData.timestamp - previousData.timestamp - 1;
           }
-          flexibleTariffData.push({
+          tariffData.push({
             timestamp: nextTimestamp,
             price: lastData.price,
           });
         }
-        dataObject.datasets[1].data = flexibleTariffData;
+        dataObject.datasets[1].data = tariffData;
       } else {
         dataObject.datasets[1].hidden = true;
       }
@@ -382,22 +382,21 @@ export default {
     },
     baseTopic: {
       get() {
-        return "openWB/optional/ep/flexible_tariff";
+        return "openWB/optional/ep/tariff";
       },
     },
     combinedState() {
-      const flexibleTariffState = this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/get/fault_state"] || 0;
+      const tariffState = this.$store.state.mqtt["openWB/optional/ep/tariff/get/fault_state"] || 0;
       const gridFeeState = this.$store.state.mqtt["openWB/optional/ep/grid_fee/get/fault_state"] || 0;
-      return Math.max(flexibleTariffState, gridFeeState);
+      return Math.max(tariffState, gridFeeState);
     },
     combinedStateMessage() {
       const messages = [];
 
-      // Flexible Tariff
-      if (this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/provider"]?.type) {
-        const state = this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/get/fault_state"] || 0;
-        const message =
-          state > 0 ? this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/get/fault_str"] : "Kein Fehler.";
+      // Stromtarif
+      if (this.$store.state.mqtt["openWB/optional/ep/tariff/provider"]?.type) {
+        const state = this.$store.state.mqtt["openWB/optional/ep/tariff/get/fault_state"] || 0;
+        const message = state > 0 ? this.$store.state.mqtt["openWB/optional/ep/tariff/get/fault_str"] : "Kein Fehler.";
         messages.push(`Stromtarif: ${message}`);
       }
 
@@ -412,15 +411,15 @@ export default {
       return messages.length > 0 ? messages.join("\n") : undefined;
     },
     tariffProvider() {
-      return this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/provider"]?.name || null;
+      return this.$store.state.mqtt["openWB/optional/ep/tariff/provider"]?.name || null;
     },
     gridFeeProvider() {
       return this.$store.state.mqtt["openWB/optional/ep/grid_fee/provider"]?.name || null;
     },
     showLegend() {
-      const flexibleTariffConfigured = this.$store.state.mqtt["openWB/optional/ep/flexible_tariff/provider"]?.type;
+      const tariffConfigured = this.$store.state.mqtt["openWB/optional/ep/tariff/provider"]?.type;
       const gridFeeConfigured = this.$store.state.mqtt["openWB/optional/ep/grid_fee/provider"]?.type;
-      return flexibleTariffConfigured && gridFeeConfigured;
+      return tariffConfigured && gridFeeConfigured;
     },
     dynamicChartOptions() {
       const options = JSON.parse(JSON.stringify(this.chartOptions)); // Deep copy

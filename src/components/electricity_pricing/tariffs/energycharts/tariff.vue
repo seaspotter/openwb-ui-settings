@@ -1,5 +1,5 @@
 <template>
-  <div class="flexible-tariff-energy-charts">
+  <div class="tariff-energy-charts">
     <openwb-base-alert subtype="info">
       Börsenstrompreise von Energy Charts (energy-charts.info)<br />
       Die Rohdaten werden von Wissenschaftlern des Fraunhofer-Instituts für Solare Energiesysteme ISE aus zahlreichen
@@ -13,7 +13,7 @@
         { value: 'AT', text: 'Österreich' },
         { value: 'CH', text: 'Schweiz' },
       ]"
-      :model-value="flexibleTariff.configuration.country"
+      :model-value="tariff.configuration.country"
       @update:model-value="updateConfiguration($event, 'configuration.country')"
     />
     <openwb-base-number-input
@@ -23,7 +23,7 @@
       :precision="3"
       required
       unit="ct/kWh"
-      :model-value="parseFloat((flexibleTariff.configuration.surcharge * 100000).toFixed(4))"
+      :model-value="parseFloat((tariff.configuration.surcharge * 100000).toFixed(4))"
       @update:model-value="updateConfiguration($event / 100000, 'configuration.surcharge')"
     >
       <template #help>
@@ -40,9 +40,9 @@
       :precision="3"
       unit="ct/kWh"
       :model-value="
-        flexibleTariff.configuration.price_cap == null
+        tariff.configuration.price_cap == null
           ? undefined
-          : parseFloat((flexibleTariff.configuration.price_cap * 100000).toFixed(4))
+          : parseFloat((tariff.configuration.price_cap * 100000).toFixed(4))
       "
       @update:model-value="updateConfiguration($event == null ? null : $event / 100000, 'configuration.price_cap')"
     >
@@ -59,7 +59,7 @@
         { buttonValue: true, text: 'Netto' },
         { buttonValue: false, text: 'Brutto' },
       ]"
-      :model-value="flexibleTariff.configuration.net"
+      :model-value="tariff.configuration.net"
       @update:model-value="updateConfiguration($event, 'configuration.net')"
     >
       <template #help>
@@ -69,13 +69,13 @@
     </openwb-base-button-group-input>
 
     <openwb-base-number-input
-      v-if="!flexibleTariff.configuration.net"
+      v-if="!tariff.configuration.net"
       title="Mehrwertsteuer"
       unit="%"
       :min="0"
       :max="50"
       :step="0.01"
-      :model-value="flexibleTariff.configuration.tax"
+      :model-value="tariff.configuration.tax"
       @update:model-value="updateConfiguration($event, 'configuration.tax')"
     >
       <template #help> Mehrwertsteuer in Prozent (z.B. 20%) </template>
@@ -84,10 +84,10 @@
 </template>
 
 <script>
-import FlexibleTariffConfigMixin from "../FlexibleTariffConfigMixin.vue";
+import TariffConfigMixin from "../TariffConfigMixin.vue";
 
 export default {
-  name: "FlexibleTariffEnergyCharts",
-  mixins: [FlexibleTariffConfigMixin],
+  name: "TariffEnergyCharts",
+  mixins: [TariffConfigMixin],
 };
 </script>

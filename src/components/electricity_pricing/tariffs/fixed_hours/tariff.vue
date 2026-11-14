@@ -1,5 +1,5 @@
 <template>
-  <div class="flexible-tariff-fixed-hours">
+  <div class="tariff-fixed-hours">
     <openwb-base-alert subtype="info">
       Konfiguriert feste Tarifzeiten, z.b. HT, NT und Standardpreis.
     </openwb-base-alert>
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import FlexibleTariffConfigMixin from "../FlexibleTariffConfigMixin.vue";
+import TariffConfigMixin from "../TariffConfigMixin.vue";
 import FixedTariff from "./FixedTariff.vue";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -54,16 +54,16 @@ library.add(fasPlus);
 library.add(fasTrash);
 
 export default {
-  name: "FlexibleTariffFixedHours",
+  name: "TariffFixedHours",
   components: {
     FontAwesomeIcon,
     FixedTariff,
   },
-  mixins: [FlexibleTariffConfigMixin],
+  mixins: [TariffConfigMixin],
   computed: {
     value: {
       get() {
-        return this.flexibleTariff;
+        return this.tariff;
       },
       set(newValue) {
         console.log("set", newValue);

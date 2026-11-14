@@ -1,5 +1,5 @@
 <template>
-  <div class="flexible-tariff-naturstrom">
+  <div class="tariff-naturstrom">
     <openwb-base-alert subtype="info">
       Über die Naturstrom-Authentifizierung kannst Du Deine Stromtarif-Daten für die Ladeplanung nutzen. Nach der
       Anmeldung bei Naturstrom wird ein Access- und Refresh-Token angezeigt, welche Du hier einfügen musst.
@@ -43,7 +43,7 @@
       required
       :disabled="true"
       pattern="^ory_at_.*$"
-      :model-value="flexibleTariff.configuration.token?.access_token || ''"
+      :model-value="tariff.configuration.token?.access_token || ''"
       @update:model-value="updateConfiguration($event, 'configuration.token.access_token')"
     >
       <template #help>
@@ -56,7 +56,7 @@
       required
       pattern="^ory_rt_.*$"
       :disabled="true"
-      :model-value="flexibleTariff.configuration.token?.refresh_token || ''"
+      :model-value="tariff.configuration.token?.refresh_token || ''"
       @update:model-value="updateConfiguration($event, 'configuration.token.refresh_token')"
     >
       <template #help>
@@ -68,7 +68,7 @@
       title="4. Accounts abrufen"
       button-text="Accounts laden"
       subtype="info"
-      :disabled="!flexibleTariff.configuration.token?.access_token"
+      :disabled="!tariff.configuration.token?.access_token"
       @button-clicked="fetch_accounts"
     >
       <template #help>
@@ -79,7 +79,7 @@
     <openwb-base-select-input
       title="Accounts"
       :options="accountsOptions"
-      :model-value="flexibleTariff.configuration.account_id"
+      :model-value="tariff.configuration.account_id"
       @update:model-value="updateSelectedAccount"
     >
       <template #help>
@@ -91,18 +91,18 @@
 
 <script>
 import axios from "axios";
-import FlexibleTariffConfigMixin from "../FlexibleTariffConfigMixin.vue";
+import TariffConfigMixin from "../TariffConfigMixin.vue";
 
 const OAUTH_BASE_URL = "https://smart.naturstrom.de";
 const CLIENT_ID = "exnaton-public";
 const REDIRECT_URI = "https://naturstrom.openwb.de/naturstrom-callback.php";
 const SCOPE = "email profile";
 const OAUTH_MAX_AGE_MS = 10 * 60 * 1000;
-const LOCAL_NATURSTROM_ENDPOINT = `${location.protocol}//${location.host}/openWB/web/settings/modules/electricity_pricing/flexible_tariffs/naturstrom/naturstrom.php`;
+const LOCAL_NATURSTROM_ENDPOINT = `${location.protocol}//${location.host}/openWB/web/settings/modules/electricity_pricing/tariffs/naturstrom/naturstrom.php`;
 
 export default {
-  name: "FlexibleTariffNaturstrom",
-  mixins: [FlexibleTariffConfigMixin],
+  name: "TariffNaturstrom",
+  mixins: [TariffConfigMixin],
   data() {
     return {
       accounts: [],
@@ -117,10 +117,10 @@ export default {
       }));
 
       // Fallback: Wenn keine Optionen vorhanden sind, aber eine Account-ID in der Config existiert
-      if (options.length === 0 && this.flexibleTariff.configuration.account_id) {
+      if (options.length === 0 && this.tariff.configuration.account_id) {
         options.push({
-          value: this.flexibleTariff.configuration.account_id,
-          text: this.flexibleTariff.configuration.account_name || this.flexibleTariff.configuration.account_id,
+          value: this.tariff.configuration.account_id,
+          text: this.tariff.configuration.account_name || this.tariff.configuration.account_id,
         });
       }
 
@@ -174,7 +174,7 @@ export default {
     },
 
     async fetch_accounts() {
-      if (!this.flexibleTariff.configuration.token?.access_token) {
+      if (!this.tariff.configuration.token?.access_token) {
         this.$root.postClientMessage("Kein Access-Token vorhanden.", "warning");
         return;
       }
@@ -185,7 +185,7 @@ export default {
           url: OAUTH_BASE_URL,
           user_agent: navigator.userAgent,
           data: {
-            access_token: this.flexibleTariff.configuration.token?.access_token,
+            access_token: this.tariff.configuration.token?.access_token,
           },
         };
 

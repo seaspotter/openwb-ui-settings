@@ -512,8 +512,8 @@
                 v-if="!$store.state.mqtt['openWB/optional/ep/configured']"
                 subtype="warning"
               >
-                Bitte in den übergreifenden Ladeeinstellungen einen Strompreis-Anbieter konfigurieren. Ohne
-                Strompreis-Anbieter schaltet der Speicher auf Eigenregelung.
+                Bitte unter Konfiguration - Energiekosten einen dynamischen Strompreis-Anbieter oder einen
+                zeitabhängigen Tarif (HT/NT) konfigurieren. Ohne diese schaltet der Speicher auf Eigenregelung.
               </openwb-base-alert>
               <openwb-base-button-group-input
                 title="Preisgrenze für Netzbezug statt Speicherentladung"

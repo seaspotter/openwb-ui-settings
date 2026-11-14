@@ -1,5 +1,5 @@
 <template>
-  <div class="flexible-tariff-awattar">
+  <div class="tariff-awattar">
     <openwb-base-select-input
       title="Land"
       not-selected="Bitte auswählen"
@@ -7,7 +7,7 @@
         { value: 'de', text: 'Deutschland' },
         { value: 'at', text: 'Österreich' },
       ]"
-      :model-value="flexibleTariff.configuration.country"
+      :model-value="tariff.configuration.country"
       @update:model-value="updateConfiguration($event, 'configuration.country')"
     >
       <template #help>
@@ -22,7 +22,7 @@
         { buttonValue: true, text: 'Netto' },
         { buttonValue: false, text: 'Brutto' },
       ]"
-      :model-value="flexibleTariff.configuration.net ?? true"
+      :model-value="tariff.configuration.net ?? true"
       @update:model-value="updateConfiguration($event, 'configuration.net')"
     >
       <template #help>
@@ -32,19 +32,19 @@
     </openwb-base-button-group-input>
 
     <div
-      v-if="!flexibleTariff.configuration.net"
+      v-if="!tariff.configuration.net"
       class="mt-3"
     >
       <h5 class="mb-3">Preisberechnung</h5>
       <div class="alert alert-info mb-3">
         <strong>Formel:</strong><br />
-        Stündliche Preise EPEX Spot® {{ flexibleTariff.configuration.country?.toUpperCase() || "AT" }}<br />
-        + | Stündliche Preise EPEX Spot® {{ flexibleTariff.configuration.country?.toUpperCase() || "AT" }} | ×
-        {{ (flexibleTariff.configuration.proportional / 100 || 0).toFixed(2) }} ({{
-          (flexibleTariff.configuration.proportional || 0).toFixed(0)
+        Stündliche Preise EPEX Spot® {{ tariff.configuration.country?.toUpperCase() || "AT" }}<br />
+        + | Stündliche Preise EPEX Spot® {{ tariff.configuration.country?.toUpperCase() || "AT" }} | ×
+        {{ (tariff.configuration.proportional / 100 || 0).toFixed(2) }} ({{
+          (tariff.configuration.proportional || 0).toFixed(0)
         }}%)<br />
-        + {{ (flexibleTariff.configuration.fix * 100000 || 0).toFixed(3) }} Cent/kWh<br />
-        + {{ (flexibleTariff.configuration.tax || 0).toFixed(0) }}% MwSt.
+        + {{ (tariff.configuration.fix * 100000 || 0).toFixed(3) }} Cent/kWh<br />
+        + {{ (tariff.configuration.tax || 0).toFixed(0) }}% MwSt.
       </div>
 
       <div class="row">
@@ -55,7 +55,7 @@
             :min="0"
             :max="100"
             :step="0.01"
-            :model-value="flexibleTariff.configuration.proportional || 0"
+            :model-value="tariff.configuration.proportional || 0"
             @update:model-value="updateConfiguration($event, 'configuration.proportional')"
           >
             <template #help> Prozentuale Gebühr auf den Börsenpreis (z.B. 3% = 0.03) </template>
@@ -68,7 +68,7 @@
             unit="Cent/kWh"
             :min="0"
             :step="0.001"
-            :model-value="flexibleTariff.configuration.fix * 100000 || 0"
+            :model-value="tariff.configuration.fix * 100000 || 0"
             @update:model-value="updateConfiguration($event / 100000, 'configuration.fix')"
           >
             <template #help> Feste Gebühr pro kWh (z.B. 1,500 Cent/kWh) </template>
@@ -82,7 +82,7 @@
             :min="0"
             :max="50"
             :step="0.01"
-            :model-value="flexibleTariff.configuration.tax || 0"
+            :model-value="tariff.configuration.tax || 0"
             @update:model-value="updateConfiguration($event, 'configuration.tax')"
           >
             <template #help> Mehrwertsteuer in Prozent (z.B. 20%) </template>
@@ -94,10 +94,10 @@
 </template>
 
 <script>
-import FlexibleTariffConfigMixin from "../FlexibleTariffConfigMixin.vue";
+import TariffConfigMixin from "../TariffConfigMixin.vue";
 
 export default {
-  name: "FlexibleTariffAwattar",
-  mixins: [FlexibleTariffConfigMixin],
+  name: "TariffAwattar",
+  mixins: [TariffConfigMixin],
 };
 </script>

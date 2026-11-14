@@ -597,8 +597,9 @@
                   class="mt-2"
                   subtype="warning"
                 >
-                  Bitte in den übergreifenden Ladeeinstellungen einen Strompreis-Anbieter konfigurieren. Ohne
-                  Strompreis-Anbieter wird das Gerät im Modus Eco nur eingeschaltet, wenn Überschuss vorhanden ist.
+                  Bitte unter Konfiguration - Energiekosten einen dynamischen Strompreis-Anbieter oder einen
+                  zeitabhängigen Tarif (HT/NT) konfigurieren. Ohne diese wird das Gerät im Modus Eco nur eingeschaltet,
+                  wenn Überschuss vorhanden ist.
                 </openwb-base-alert>
               </openwb-base-card>
               <hr />
