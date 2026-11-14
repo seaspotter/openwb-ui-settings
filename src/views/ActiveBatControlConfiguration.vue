@@ -509,7 +509,7 @@
             <div v-if="$store.state.mqtt['openWB/bat/config/power_limit_condition'] === 'price_limit'">
               <openwb-base-heading class="mt-0"> Preisgrenze (Variable Strompreise) </openwb-base-heading>
               <openwb-base-alert
-                v-if="!$store.state.mqtt['openWB/optional/ep/configured']"
+                v-if="!$store.state.mqtt['openWB/optional/ep/controllable']"
                 subtype="warning"
               >
                 Bitte unter Konfiguration - Energiekosten einen dynamischen Strompreis-Anbieter oder einen
@@ -690,7 +690,7 @@ export default {
         { topic: "openWB/general/chargemode_config/bat/power_reserve", writeable: true },
         { topic: "openWB/general/chargemode_config/bat/power_reserve_active", writeable: true },
         { topic: "openWB/general/extern", writeable: false },
-        { topic: "openWB/optional/ep/configured", writeable: false },
+        { topic: "openWB/optional/ep/controllable", writeable: false },
         { topic: "openWB/system/device/+/component/+/config", writeable: false },
       ],
     };

@@ -271,7 +271,7 @@
       ]"
     />
     <openwb-base-alert
-      v-if="plan.et_active == true && !$store.state.mqtt['openWB/optional/ep/configured']"
+      v-if="plan.et_active == true && !$store.state.mqtt['openWB/optional/ep/controllable']"
       subtype="danger"
     >
       Bitte unter Konfiguration - Energiekosten einen dynamischen Strompreis-Anbieter oder einen zeitabhängigen Tarif
@@ -374,7 +374,7 @@ export default {
   emits: ["update:modelValue", "sendCommand"],
   data() {
     return {
-      mqttTopics: [{ topic: "openWB/optional/ep/configured", writeable: false }],
+      mqttTopics: [{ topic: "openWB/optional/ep/controllable", writeable: false }],
       showRemoveModal: false,
     };
   },

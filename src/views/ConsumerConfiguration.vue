@@ -593,7 +593,7 @@
                   </template>
                 </openwb-base-number-input>
                 <openwb-base-alert
-                  v-if="!$store.state.mqtt['openWB/optional/ep/configured']"
+                  v-if="!$store.state.mqtt['openWB/optional/ep/controllable']"
                   class="mt-2"
                   subtype="warning"
                 >
@@ -774,7 +774,7 @@ export default {
         { topic: "openWB/counter/get/hierarchy", writeable: false },
         { topic: "openWB/general/extern", writeable: false },
         { topic: "openWB/general/legacy_smarthome_active", writeable: true },
-        { topic: "openWB/optional/ep/configured", writeable: false },
+        { topic: "openWB/optional/ep/controllable", writeable: false },
         { topic: "openWB/system/configurable/consumers", writeable: false },
         { topic: "openWB/system/device/+/component/+/config", writeable: false },
         { topic: "openWB/system/device/+/config", writeable: false },
